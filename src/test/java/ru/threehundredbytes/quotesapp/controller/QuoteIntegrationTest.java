@@ -2,7 +2,6 @@ package ru.threehundredbytes.quotesapp.controller;
 
 import lombok.SneakyThrows;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -10,15 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 import ru.threehundredbytes.quotesapp.persistence.entity.Quote;
 import ru.threehundredbytes.quotesapp.persistence.repository.QuoteRepository;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static ru.threehundredbytes.quotesapp.util.ResourceUtils.getResourceFileAsString;
@@ -26,27 +21,9 @@ import static ru.threehundredbytes.quotesapp.util.ResourceUtils.getResourceFileA
 @SpringBootTest
 @Sql(value = "/sql/quote/insertion.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(value = "/sql/quote/deletion.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-public class QuoteIntegrationTest {
-    @Autowired
-    WebApplicationContext webApplicationContext;
-
-    MockMvc mockMvc;
-
+public class QuoteIntegrationTest extends BaseIntegrationTest {
     @Autowired
     QuoteRepository quoteRepository;
-
-    @BeforeEach
-    void setUp() {
-        mockMvc = MockMvcBuilders
-                .webAppContextSetup(webApplicationContext)
-                .build();
-    }
-
-    @Test
-    void contextLoads() {
-        assertThat(webApplicationContext).isNotNull();
-        assertThat(mockMvc).isNotNull();
-    }
 
     @DisplayName("getAllQuotes() tests")
     @Nested

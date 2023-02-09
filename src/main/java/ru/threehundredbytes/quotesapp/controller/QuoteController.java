@@ -9,37 +9,37 @@ import ru.threehundredbytes.quotesapp.service.QuoteService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/quotes")
 @RequiredArgsConstructor
 public class QuoteController {
     private final QuoteService quoteService;
 
     // Pagination and sorting to get top/flop 10
-    @GetMapping("/quotes")
+    @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<Quote> getAllQuotes() {
         return quoteService.getAllQuotes();
     }
 
-    @GetMapping("/quotes/random")
+    @GetMapping("/random")
     @ResponseStatus(HttpStatus.OK)
     public Quote getRandomQuote() {
         return quoteService.getRandomQuote();
     }
 
-    @PostMapping("/quotes")
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Quote createQuote(@RequestBody Quote quote) {
         return quoteService.createQuote(quote);
     }
 
-    @PutMapping("/quotes/{quoteId}")
+    @PutMapping("/{quoteId}")
     @ResponseStatus(HttpStatus.OK)
     public Quote updateQuoteById(@PathVariable Long quoteId, @RequestBody Quote quote) {
         return quoteService.updateQuote(quoteId, quote);
     }
 
-    @DeleteMapping("/quotes/{quoteId}")
+    @DeleteMapping("/{quoteId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteQuoteById(@PathVariable Long quoteId) {
         quoteService.deleteQuote(quoteId);
