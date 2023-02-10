@@ -7,7 +7,7 @@ public class VoteMapper {
     private VoteMapper() {
     }
 
-    public static VoteResponseDTO entityToResponseDTO(Vote vote) {
+    public static VoteResponseDTO mapEntityToResponseDTO(Vote vote) {
         return VoteResponseDTO.builder()
                 .userId(vote.getUser().getId())
                 .username(vote.getUser().getUsername())

@@ -22,7 +22,7 @@ public class Quote {
     private String text;
 
     @Builder.Default
-    private Long voteCounter = 0L;
+    private Long voteCount = 0L;
 
     @ManyToOne(fetch = FetchType.EAGER)
     private User postedBy;

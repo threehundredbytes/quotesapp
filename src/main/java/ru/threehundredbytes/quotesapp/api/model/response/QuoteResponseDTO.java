@@ -8,7 +8,7 @@ import java.time.LocalDate;
 public record QuoteResponseDTO(
         Long id,
         String text,
-        Long voteCounter,
+        Long voteCount,
         Long postedByUserId,
         String postedByUsername,
         LocalDate createdAt,

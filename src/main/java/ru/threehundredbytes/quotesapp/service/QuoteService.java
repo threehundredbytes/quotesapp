@@ -24,7 +24,7 @@ public class QuoteService {
 
     public List<QuoteResponseDTO> getAllQuotes(PageRequest pageRequest) {
         return quoteRepository.findAll(pageRequest)
-                .map(QuoteMapper::entityToResponseDTO)
+                .map(QuoteMapper::mapEntityToResponseDTO)
                 .toList();
     }
 
@@ -44,7 +44,7 @@ public class QuoteService {
             randomQuote = page.getContent().get(0);
         }
 
-        return QuoteMapper.entityToResponseDTO(randomQuote);
+        return QuoteMapper.mapEntityToResponseDTO(randomQuote);
     }
 
     public QuoteResponseDTO createQuote(QuoteRequestDTO requestDTO, Long userId) {
@@ -55,7 +55,7 @@ public class QuoteService {
                 .postedBy(user)
                 .build();
 
-        return QuoteMapper.entityToResponseDTO(quoteRepository.save(quote));
+        return QuoteMapper.mapEntityToResponseDTO(quoteRepository.save(quote));
     }
 
     public QuoteResponseDTO updateQuote(Long quoteId, QuoteRequestDTO requestDTO) {
@@ -63,7 +63,7 @@ public class QuoteService {
 
         quote.setText(requestDTO.text());
 
-        return QuoteMapper.entityToResponseDTO(quoteRepository.save(quote));
+        return QuoteMapper.mapEntityToResponseDTO(quoteRepository.save(quote));
     }
 
     public void deleteQuote(Long quoteId) {

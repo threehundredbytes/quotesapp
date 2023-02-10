@@ -29,6 +29,6 @@ public class UserService {
                 .password(requestDTO.password())
                 .build();
 
-        return UserMapper.entityToResponseDTO(userRepository.save(user));
+        return UserMapper.mapEntityToResponseDTO(userRepository.save(user));
     }
 }

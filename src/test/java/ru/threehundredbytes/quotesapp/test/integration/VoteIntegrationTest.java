@@ -123,7 +123,7 @@ public class VoteIntegrationTest extends BaseIntegrationTest {
 
             Quote quote = quoteRepository.findById(quoteId).orElseThrow();
 
-            Assertions.assertThat(quote.getVoteCounter()).isEqualTo(1);
+            Assertions.assertThat(quote.getVoteCount()).isEqualTo(1);
         }
 
         @Test
@@ -142,7 +142,7 @@ public class VoteIntegrationTest extends BaseIntegrationTest {
 
             Quote quote = quoteRepository.findById(quoteId).orElseThrow();
 
-            Assertions.assertThat(quote.getVoteCounter()).isEqualTo(1);
+            Assertions.assertThat(quote.getVoteCount()).isEqualTo(1);
         }
 
         @Test
@@ -186,7 +186,7 @@ public class VoteIntegrationTest extends BaseIntegrationTest {
 
             Quote quote = quoteRepository.findById(quoteId).orElseThrow();
 
-            Assertions.assertThat(quote.getVoteCounter()).isEqualTo(-1);
+            Assertions.assertThat(quote.getVoteCount()).isEqualTo(-1);
         }
 
         @Test
@@ -205,7 +205,7 @@ public class VoteIntegrationTest extends BaseIntegrationTest {
 
             Quote quote = quoteRepository.findById(quoteId).orElseThrow();
 
-            Assertions.assertThat(quote.getVoteCounter()).isEqualTo(-1);
+            Assertions.assertThat(quote.getVoteCount()).isEqualTo(-1);
         }
 
         @Test
@@ -246,7 +246,7 @@ public class VoteIntegrationTest extends BaseIntegrationTest {
 
             Quote quote = quoteRepository.findById(quoteId).orElseThrow();
 
-            Assertions.assertThat(quote.getVoteCounter()).isEqualTo(0);
+            Assertions.assertThat(quote.getVoteCount()).isEqualTo(0);
         }
 
         @Test
@@ -262,7 +262,7 @@ public class VoteIntegrationTest extends BaseIntegrationTest {
 
             Quote quote = quoteRepository.findById(quoteId).orElseThrow();
 
-            Assertions.assertThat(quote.getVoteCounter()).isEqualTo(0);
+            Assertions.assertThat(quote.getVoteCount()).isEqualTo(0);
         }
 
 

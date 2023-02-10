@@ -7,8 +7,8 @@ import org.springframework.data.domain.Sort;
 @Getter
 @RequiredArgsConstructor
 public enum QuoteSort {
-    VOTE_ASC(Sort.by(Sort.Direction.ASC, "voteCounter")),
-    VOTE_DESC(Sort.by(Sort.Direction.DESC, "voteCounter"));
+    VOTE_ASC(Sort.by(Sort.Direction.ASC, "voteCount")),
+    VOTE_DESC(Sort.by(Sort.Direction.DESC, "voteCount"));
 
     private final Sort sort;
 }

@@ -7,11 +7,11 @@ public class QuoteMapper {
     private QuoteMapper() {
     }
 
-    public static QuoteResponseDTO entityToResponseDTO(Quote quote) {
+    public static QuoteResponseDTO mapEntityToResponseDTO(Quote quote) {
         return QuoteResponseDTO.builder()
                 .id(quote.getId())
                 .text(quote.getText())
-                .voteCounter(quote.getVoteCounter())
+                .voteCount(quote.getVoteCount())
                 .postedByUserId(quote.getPostedBy().getId())
                 .postedByUsername(quote.getPostedBy().getUsername())
                 .createdAt(quote.getCreatedAt())

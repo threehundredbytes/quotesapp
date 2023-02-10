@@ -27,7 +27,7 @@ public class VoteService {
         Quote quote = quoteRepository.findById(quoteId).orElseThrow(NotFoundException::new);
 
         return voteRepository.findAllByQuote(quote).stream()
-                .map(VoteMapper::entityToResponseDTO)
+                .map(VoteMapper::mapEntityToResponseDTO)
                 .toList();
     }
 
@@ -38,7 +38,7 @@ public class VoteService {
         Vote vote = voteRepository.findByQuoteAndUser(quote, user)
                 .orElseGet(() -> createDefaultVote(quote, user));
 
-        return VoteMapper.entityToResponseDTO(vote);
+        return VoteMapper.mapEntityToResponseDTO(vote);
     }
 
     public VoteResponseDTO upVote(Long quoteId, Long userId) {
@@ -49,8 +49,8 @@ public class VoteService {
                 .orElseGet(() -> createDefaultVote(quote, user));
 
         switch (vote.getVoteState()) {
-            case DOWNVOTE -> quote.setVoteCounter(quote.getVoteCounter() + 2);
-            case NOT_VOTED -> quote.setVoteCounter(quote.getVoteCounter() + 1);
+            case DOWNVOTE -> quote.setVoteCount(quote.getVoteCount() + 2);
+            case NOT_VOTED -> quote.setVoteCount(quote.getVoteCount() + 1);
             case UPVOTE -> throw new ConflictException();
         }
 
@@ -59,7 +59,7 @@ public class VoteService {
         vote = voteRepository.save(vote);
         quoteRepository.save(quote);
 
-        return VoteMapper.entityToResponseDTO(vote);
+        return VoteMapper.mapEntityToResponseDTO(vote);
     }
 
     public VoteResponseDTO downVote(Long quoteId, Long userId) {
@@ -70,8 +70,8 @@ public class VoteService {
                 .orElseGet(() -> createDefaultVote(quote, user));
 
         switch (vote.getVoteState()) {
-            case UPVOTE -> quote.setVoteCounter(quote.getVoteCounter() - 2);
-            case NOT_VOTED -> quote.setVoteCounter(quote.getVoteCounter() - 1);
+            case UPVOTE -> quote.setVoteCount(quote.getVoteCount() - 2);
+            case NOT_VOTED -> quote.setVoteCount(quote.getVoteCount() - 1);
             case DOWNVOTE -> throw new ConflictException();
         }
 
@@ -80,7 +80,7 @@ public class VoteService {
         vote = voteRepository.save(vote);
         quoteRepository.save(quote);
 
-        return VoteMapper.entityToResponseDTO(vote);
+        return VoteMapper.mapEntityToResponseDTO(vote);
     }
 
     public void deleteVote(Long quoteId, Long userId) {
@@ -90,8 +90,8 @@ public class VoteService {
         Vote vote = voteRepository.findByQuoteAndUser(quote, user).orElseThrow(NotFoundException::new);
 
         switch (vote.getVoteState()) {
-            case UPVOTE -> quote.setVoteCounter(quote.getVoteCounter() - 1);
-            case DOWNVOTE -> quote.setVoteCounter(quote.getVoteCounter() + 1);
+            case UPVOTE -> quote.setVoteCount(quote.getVoteCount() - 1);
+            case DOWNVOTE -> quote.setVoteCount(quote.getVoteCount() + 1);
         }
 
         quoteRepository.save(quote);

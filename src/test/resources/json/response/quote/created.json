@@ -1,7 +1,7 @@
 {
   "id": 7,
   "text": "Now or never!",
-  "voteCounter": 0,
+  "voteCount": 0,
   "postedByUserId": 1,
   "postedByUsername": "admin"
 }

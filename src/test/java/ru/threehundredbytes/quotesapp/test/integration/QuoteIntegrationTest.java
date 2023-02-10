@@ -68,7 +68,7 @@ public class QuoteIntegrationTest extends BaseIntegrationTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.id").isNumber())
                     .andExpect(jsonPath("$.text").value(Matchers.in(quoteTexts)))
-                    .andExpect(jsonPath("$.voteCounter").value(0))
+                    .andExpect(jsonPath("$.voteCount").value(0))
                     .andExpect(jsonPath("$.postedByUserId").value(1))
                     .andExpect(jsonPath("$.postedByUsername").value("admin"))
                     .andExpect(jsonPath("$.createdAt").isNotEmpty())

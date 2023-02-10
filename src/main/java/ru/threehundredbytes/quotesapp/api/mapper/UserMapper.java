@@ -7,7 +7,7 @@ public class UserMapper {
     private UserMapper() {
     }
 
-    public static UserResponseDTO entityToResponseDTO(User user) {
+    public static UserResponseDTO mapEntityToResponseDTO(User user) {
         return UserResponseDTO.builder()
                 .id(user.getId())
                 .username(user.getUsername())
