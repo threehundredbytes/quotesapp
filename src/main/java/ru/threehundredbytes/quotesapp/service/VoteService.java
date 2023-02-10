@@ -3,9 +3,11 @@ package ru.threehundredbytes.quotesapp.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.threehundredbytes.quotesapp.api.mapper.VoteMapper;
+import ru.threehundredbytes.quotesapp.api.model.request.VoteRequestDTO;
 import ru.threehundredbytes.quotesapp.api.model.response.VoteResponseDTO;
 import ru.threehundredbytes.quotesapp.exception.ConflictException;
 import ru.threehundredbytes.quotesapp.exception.NotFoundException;
+import ru.threehundredbytes.quotesapp.exception.UnprocessableEntityException;
 import ru.threehundredbytes.quotesapp.persistence.entity.Quote;
 import ru.threehundredbytes.quotesapp.persistence.entity.User;
 import ru.threehundredbytes.quotesapp.persistence.entity.Vote;
@@ -41,44 +43,18 @@ public class VoteService {
         return VoteMapper.mapEntityToResponseDTO(vote);
     }
 
-    public VoteResponseDTO upVote(Long quoteId, Long userId) {
+    public VoteResponseDTO createVote(Long quoteId, VoteRequestDTO requestDTO, Long userId) {
         Quote quote = quoteRepository.findById(quoteId).orElseThrow(NotFoundException::new);
         User user = userRepository.findById(userId).orElseThrow(NotFoundException::new);
-
         Vote vote = voteRepository.findByQuoteAndUser(quote, user)
                 .orElseGet(() -> createDefaultVote(quote, user));
 
-        switch (vote.getVoteState()) {
-            case DOWNVOTE -> quote.setVoteCount(quote.getVoteCount() + 2);
-            case NOT_VOTED -> quote.setVoteCount(quote.getVoteCount() + 1);
-            case UPVOTE -> throw new ConflictException();
-        }
-
-        vote.setVoteState(VoteState.UPVOTE);
-
-        vote = voteRepository.save(vote);
+        long voteCountDelta = getVoteCountDelta(vote.getVoteState(), requestDTO.voteState());
+        quote.setVoteCount(quote.getVoteCount() + voteCountDelta);
         quoteRepository.save(quote);
 
-        return VoteMapper.mapEntityToResponseDTO(vote);
-    }
-
-    public VoteResponseDTO downVote(Long quoteId, Long userId) {
-        Quote quote = quoteRepository.findById(quoteId).orElseThrow(NotFoundException::new);
-        User user = userRepository.findById(userId).orElseThrow(NotFoundException::new);
-
-        Vote vote = voteRepository.findByQuoteAndUser(quote, user)
-                .orElseGet(() -> createDefaultVote(quote, user));
-
-        switch (vote.getVoteState()) {
-            case UPVOTE -> quote.setVoteCount(quote.getVoteCount() - 2);
-            case NOT_VOTED -> quote.setVoteCount(quote.getVoteCount() - 1);
-            case DOWNVOTE -> throw new ConflictException();
-        }
-
-        vote.setVoteState(VoteState.DOWNVOTE);
-
+        vote.setVoteState(requestDTO.voteState());
         vote = voteRepository.save(vote);
-        quoteRepository.save(quote);
 
         return VoteMapper.mapEntityToResponseDTO(vote);
     }
@@ -103,5 +79,21 @@ public class VoteService {
                 .quote(quote)
                 .user(user)
                 .build();
+    }
+
+    private long getVoteCountDelta(VoteState currentState, VoteState newState) {
+        return switch (newState) {
+            case UPVOTE -> switch (currentState) {
+                case DOWNVOTE -> 2;
+                case NOT_VOTED -> 1;
+                case UPVOTE -> throw new ConflictException();
+            };
+            case DOWNVOTE -> switch (currentState) {
+                case UPVOTE -> -2;
+                case NOT_VOTED -> -1;
+                case DOWNVOTE -> throw new ConflictException();
+            };
+            case NOT_VOTED -> throw new UnprocessableEntityException();
+        };
     }
 }

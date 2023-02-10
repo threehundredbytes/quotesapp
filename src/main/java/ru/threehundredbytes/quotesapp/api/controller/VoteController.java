@@ -3,6 +3,7 @@ package ru.threehundredbytes.quotesapp.api.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ru.threehundredbytes.quotesapp.api.model.request.VoteRequestDTO;
 import ru.threehundredbytes.quotesapp.api.model.response.VoteResponseDTO;
 import ru.threehundredbytes.quotesapp.service.VoteService;
 
@@ -26,16 +27,13 @@ public class VoteController {
         return voteService.getVote(quoteId, userId);
     }
 
-    @PostMapping("/up")
+    @PostMapping
     @ResponseStatus(HttpStatus.OK)
-    public VoteResponseDTO upVote(@PathVariable Long quoteId, @RequestParam Long userId) {
-        return voteService.upVote(quoteId, userId);
-    }
-
-    @PostMapping("/down")
-    @ResponseStatus(HttpStatus.OK)
-    public VoteResponseDTO downVote(@PathVariable Long quoteId, @RequestParam Long userId) {
-        return voteService.downVote(quoteId, userId);
+    public VoteResponseDTO createVote(
+            @PathVariable Long quoteId,
+            @RequestBody VoteRequestDTO requestDTO,
+            @RequestParam Long userId) {
+        return voteService.createVote(quoteId, requestDTO, userId);
     }
 
     @DeleteMapping

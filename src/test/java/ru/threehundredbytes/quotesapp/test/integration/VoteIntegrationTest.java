@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 import ru.threehundredbytes.quotesapp.persistence.entity.Quote;
 import ru.threehundredbytes.quotesapp.persistence.repository.QuoteRepository;
@@ -104,20 +105,23 @@ public class VoteIntegrationTest extends BaseIntegrationTest {
         }
     }
 
-    @DisplayName("upVote() tests")
+    @DisplayName("createVote() - upVote tests")
     @Nested
-    class UpVoteTest {
+    class CreateVoteUpVoteTest {
         @Test
         @SneakyThrows
-        void upVote_quoteIsNotVoted_isOk() {
+        void createVote_upVote_quoteIsNotVoted_isOk() {
+            String requestContent = getResourceFileAsString("json/request/vote/upVote.json");
             String expectedResponse = getResourceFileAsString("json/response/vote/upVote.json");
 
             long quoteId = 6L;
             long userId = 1L;
 
-            String requestUrl = String.format("/api/v1/quotes/%d/votes/up?userId=%d", quoteId, userId);
+            String requestUrl = String.format("/api/v1/quotes/%d/votes?userId=%d", quoteId, userId);
 
-            mockMvc.perform(post(requestUrl))
+            mockMvc.perform(post(requestUrl)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(requestContent))
                     .andExpect(status().isOk())
                     .andExpect(content().json(expectedResponse));
 
@@ -128,15 +132,18 @@ public class VoteIntegrationTest extends BaseIntegrationTest {
 
         @Test
         @SneakyThrows
-        void upVote_quoteIsDownVoted_isOk() {
+        void createVote_upVote_quoteIsDownVoted_isOk() {
+            String requestContent = getResourceFileAsString("json/request/vote/upVote.json");
             String expectedResponse = getResourceFileAsString("json/response/vote/upVote.json");
 
             long quoteId = 5L;
             long userId = 1L;
 
-            String requestUrl = String.format("/api/v1/quotes/%d/votes/up?userId=%d", quoteId, userId);
+            String requestUrl = String.format("/api/v1/quotes/%d/votes?userId=%d", quoteId, userId);
 
-            mockMvc.perform(post(requestUrl))
+            mockMvc.perform(post(requestUrl)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(requestContent))
                     .andExpect(status().isOk())
                     .andExpect(content().json(expectedResponse));
 
@@ -147,40 +154,55 @@ public class VoteIntegrationTest extends BaseIntegrationTest {
 
         @Test
         @SneakyThrows
-        void upVote_quoteIsUpVoted_isConflict() {
-            mockMvc.perform(post("/api/v1/quotes/2/votes/up?userId=1"))
+        void createVote_upVote_quoteIsUpVoted_isConflict() {
+            String requestContent = getResourceFileAsString("json/request/vote/upVote.json");
+
+            mockMvc.perform(post("/api/v1/quotes/2/votes?userId=1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(requestContent))
                     .andExpect(status().isConflict());
         }
 
         @Test
         @SneakyThrows
-        void upVote_quoteDoesNotExists_isNotFound() {
-            mockMvc.perform(post("/api/v1/quotes/0/votes/up?userId=1"))
+        void createVote_upVote_quoteDoesNotExists_isNotFound() {
+            String requestContent = getResourceFileAsString("json/request/vote/upVote.json");
+
+            mockMvc.perform(post("/api/v1/quotes/0/votes?userId=1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(requestContent))
                     .andExpect(status().isNotFound());
         }
 
         @Test
         @SneakyThrows
-        void upVote_userDoesNotExists_isNotFound() {
-            mockMvc.perform(post("/api/v1/quotes/6/votes/up?userId=0"))
+        void createVote_upVote_userDoesNotExists_isNotFound() {
+            String requestContent = getResourceFileAsString("json/request/vote/upVote.json");
+
+            mockMvc.perform(post("/api/v1/quotes/2/votes?userId=0")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(requestContent))
                     .andExpect(status().isNotFound());
         }
     }
 
-    @DisplayName("downVote() tests")
+    @DisplayName("createVote() - downVote tests")
     @Nested
-    class DownVoteTest {
+    class CreateVoteDownVoteTest {
         @Test
         @SneakyThrows
-        void downVote_quoteIsNotVoted_isOk() {
+        void createVote_downVote_quoteIsNotVoted_isOk() {
+            String requestContent = getResourceFileAsString("json/request/vote/downVote.json");
             String expectedResponse = getResourceFileAsString("json/response/vote/downVote.json");
 
             long quoteId = 6L;
             long userId = 1L;
 
-            String requestUrl = String.format("/api/v1/quotes/%d/votes/down?userId=%d", quoteId, userId);
+            String requestUrl = String.format("/api/v1/quotes/%d/votes?userId=%d", quoteId, userId);
 
-            mockMvc.perform(post(requestUrl))
+            mockMvc.perform(post(requestUrl)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(requestContent))
                     .andExpect(status().isOk())
                     .andExpect(content().json(expectedResponse));
 
@@ -191,15 +213,18 @@ public class VoteIntegrationTest extends BaseIntegrationTest {
 
         @Test
         @SneakyThrows
-        void downVote_quoteIsUpVoted_isOk() {
+        void createVote_downVote_quoteIsUpVoted_isOk() {
+            String requestContent = getResourceFileAsString("json/request/vote/downVote.json");
             String expectedResponse = getResourceFileAsString("json/response/vote/downVote.json");
 
             long quoteId = 2L;
             long userId = 1L;
 
-            String requestUrl = String.format("/api/v1/quotes/%d/votes/down?userId=%d", quoteId, userId);
+            String requestUrl = String.format("/api/v1/quotes/%d/votes?userId=%d", quoteId, userId);
 
-            mockMvc.perform(post(requestUrl))
+            mockMvc.perform(post(requestUrl)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(requestContent))
                     .andExpect(status().isOk())
                     .andExpect(content().json(expectedResponse));
 
@@ -210,23 +235,72 @@ public class VoteIntegrationTest extends BaseIntegrationTest {
 
         @Test
         @SneakyThrows
-        void downVote_quoteIsDownVoted_isConflict() {
-            mockMvc.perform(post("/api/v1/quotes/5/votes/down?userId=1"))
+        void createVote_downVote_quoteIsDownVoted_isConflict() {
+            String requestContent = getResourceFileAsString("json/request/vote/downVote.json");
+
+            mockMvc.perform(post("/api/v1/quotes/5/votes?userId=1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(requestContent))
                     .andExpect(status().isConflict());
         }
 
         @Test
         @SneakyThrows
-        void downVote_quoteDoesNotExists_isNotFound() {
-            mockMvc.perform(post("/api/v1/quotes/0/votes/down?userId=1"))
+        void createVote_downVote_quoteDoesNotExists_isNotFound() {
+            String requestContent = getResourceFileAsString("json/request/vote/downVote.json");
+
+            mockMvc.perform(post("/api/v1/quotes/0/votes?userId=1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(requestContent))
                     .andExpect(status().isNotFound());
         }
 
         @Test
         @SneakyThrows
-        void downVote_userDoesNotExists_isNotFound() {
-            mockMvc.perform(post("/api/v1/quotes/6/votes/down?userId=0"))
+        void createVote_downVote_userDoesNotExists_isNotFound() {
+            String requestContent = getResourceFileAsString("json/request/vote/downVote.json");
+
+            mockMvc.perform(post("/api/v1/quotes/5/votes?userId=0")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(requestContent))
                     .andExpect(status().isNotFound());
+        }
+    }
+
+    @DisplayName("createVote() - notVoted tests")
+    @Nested
+    class CreateVoteNotVotedTest {
+        @Test
+        @SneakyThrows
+        void createVote_upVoted_requestWithNotVoted_isNotFound() {
+            String requestContent = getResourceFileAsString("json/request/vote/notVoted.json");
+
+            mockMvc.perform(post("/api/v1/quotes/2/votes?userId=1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(requestContent))
+                    .andExpect(status().isUnprocessableEntity());
+        }
+
+        @Test
+        @SneakyThrows
+        void createVote_notVoted_requestWithNotVoted_isNotFound() {
+            String requestContent = getResourceFileAsString("json/request/vote/notVoted.json");
+
+            mockMvc.perform(post("/api/v1/quotes/6/votes?userId=1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(requestContent))
+                    .andExpect(status().isUnprocessableEntity());
+        }
+
+        @Test
+        @SneakyThrows
+        void createVote_downVoted_requestWithNotVoted_isNotFound() {
+            String requestContent = getResourceFileAsString("json/request/vote/notVoted.json");
+
+            mockMvc.perform(post("/api/v1/quotes/5/votes?userId=1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(requestContent))
+                    .andExpect(status().isUnprocessableEntity());
         }
     }
 
