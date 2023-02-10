@@ -1,4 +1,4 @@
-package ru.threehundredbytes.quotesapp.controller;
+package ru.threehundredbytes.quotesapp.test.integration;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

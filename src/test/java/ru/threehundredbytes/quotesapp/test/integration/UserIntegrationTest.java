@@ -1,4 +1,4 @@
-package ru.threehundredbytes.quotesapp.controller;
+package ru.threehundredbytes.quotesapp.test.integration;
 
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;

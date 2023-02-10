@@ -1,4 +1,4 @@
-package ru.threehundredbytes.quotesapp.controller;
+package ru.threehundredbytes.quotesapp.api.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
