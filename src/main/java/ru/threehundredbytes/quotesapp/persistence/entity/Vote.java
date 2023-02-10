@@ -19,9 +19,9 @@ public class Vote {
     @Enumerated(value = EnumType.STRING)
     private VoteState voteState = VoteState.NOT_VOTED;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     private Quote quote;
 }

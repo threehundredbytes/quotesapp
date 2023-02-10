@@ -2,6 +2,8 @@ package ru.threehundredbytes.quotesapp.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.threehundredbytes.quotesapp.api.mapper.VoteMapper;
+import ru.threehundredbytes.quotesapp.api.model.response.VoteResponseDTO;
 import ru.threehundredbytes.quotesapp.exception.ConflictException;
 import ru.threehundredbytes.quotesapp.exception.NotFoundException;
 import ru.threehundredbytes.quotesapp.persistence.entity.Quote;
@@ -12,6 +14,8 @@ import ru.threehundredbytes.quotesapp.persistence.repository.QuoteRepository;
 import ru.threehundredbytes.quotesapp.persistence.repository.UserRepository;
 import ru.threehundredbytes.quotesapp.persistence.repository.VoteRepository;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class VoteService {
@@ -19,16 +23,25 @@ public class VoteService {
     private final QuoteRepository quoteRepository;
     private final UserRepository userRepository;
 
-    public VoteState getVoteState(Long quoteId, Long userId) {
+    public List<VoteResponseDTO> getAllVotes(Long quoteId) {
+        Quote quote = quoteRepository.findById(quoteId).orElseThrow(NotFoundException::new);
+
+        return voteRepository.findAllByQuote(quote).stream()
+                .map(VoteMapper::entityToResponseDTO)
+                .toList();
+    }
+
+    public VoteResponseDTO getVote(Long quoteId, Long userId) {
         Quote quote = quoteRepository.findById(quoteId).orElseThrow(NotFoundException::new);
         User user = userRepository.findById(userId).orElseThrow(NotFoundException::new);
 
-        return voteRepository.findByQuoteAndUser(quote, user)
-                .map(Vote::getVoteState)
-                .orElse(VoteState.NOT_VOTED);
+        Vote vote = voteRepository.findByQuoteAndUser(quote, user)
+                .orElseGet(() -> createDefaultVote(quote, user));
+
+        return VoteMapper.entityToResponseDTO(vote);
     }
 
-    public VoteState upVote(Long quoteId, Long userId) {
+    public VoteResponseDTO upVote(Long quoteId, Long userId) {
         Quote quote = quoteRepository.findById(quoteId).orElseThrow(NotFoundException::new);
         User user = userRepository.findById(userId).orElseThrow(NotFoundException::new);
 
@@ -43,12 +56,13 @@ public class VoteService {
 
         vote.setVoteState(VoteState.UPVOTE);
 
+        vote = voteRepository.save(vote);
         quoteRepository.save(quote);
 
-        return voteRepository.save(vote).getVoteState();
+        return VoteMapper.entityToResponseDTO(vote);
     }
 
-    public VoteState downVote(Long quoteId, Long userId) {
+    public VoteResponseDTO downVote(Long quoteId, Long userId) {
         Quote quote = quoteRepository.findById(quoteId).orElseThrow(NotFoundException::new);
         User user = userRepository.findById(userId).orElseThrow(NotFoundException::new);
 
@@ -63,9 +77,10 @@ public class VoteService {
 
         vote.setVoteState(VoteState.DOWNVOTE);
 
+        vote = voteRepository.save(vote);
         quoteRepository.save(quote);
 
-        return voteRepository.save(vote).getVoteState();
+        return VoteMapper.entityToResponseDTO(vote);
     }
 
     public void deleteVote(Long quoteId, Long userId) {

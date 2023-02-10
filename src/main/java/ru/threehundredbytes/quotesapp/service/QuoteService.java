@@ -4,9 +4,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import ru.threehundredbytes.quotesapp.api.mapper.QuoteMapper;
+import ru.threehundredbytes.quotesapp.api.model.request.QuoteRequestDTO;
+import ru.threehundredbytes.quotesapp.api.model.response.QuoteResponseDTO;
 import ru.threehundredbytes.quotesapp.exception.NotFoundException;
 import ru.threehundredbytes.quotesapp.persistence.entity.Quote;
+import ru.threehundredbytes.quotesapp.persistence.entity.User;
 import ru.threehundredbytes.quotesapp.persistence.repository.QuoteRepository;
+import ru.threehundredbytes.quotesapp.persistence.repository.UserRepository;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -15,12 +20,15 @@ import java.util.concurrent.ThreadLocalRandom;
 @RequiredArgsConstructor
 public class QuoteService {
     private final QuoteRepository quoteRepository;
+    private final UserRepository userRepository;
 
-    public List<Quote> getAllQuotes() {
-        return quoteRepository.findAll();
+    public List<QuoteResponseDTO> getAllQuotes(PageRequest pageRequest) {
+        return quoteRepository.findAll(pageRequest)
+                .map(QuoteMapper::entityToResponseDTO)
+                .toList();
     }
 
-    public Quote getRandomQuote() {
+    public QuoteResponseDTO getRandomQuote() {
         long quotesCount = quoteRepository.count();
 
         if (quotesCount == 0) {
@@ -36,21 +44,26 @@ public class QuoteService {
             randomQuote = page.getContent().get(0);
         }
 
-        return randomQuote;
+        return QuoteMapper.entityToResponseDTO(randomQuote);
     }
 
-    public Quote createQuote(Quote quote) {
-        return quoteRepository.save(quote);
+    public QuoteResponseDTO createQuote(QuoteRequestDTO requestDTO, Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(NotFoundException::new);
+
+        Quote quote = Quote.builder()
+                .text(requestDTO.text())
+                .postedBy(user)
+                .build();
+
+        return QuoteMapper.entityToResponseDTO(quoteRepository.save(quote));
     }
 
-    public Quote updateQuote(Long quoteId, Quote quote) {
-        if (!quoteRepository.existsById(quoteId)) {
-            throw new NotFoundException();
-        }
+    public QuoteResponseDTO updateQuote(Long quoteId, QuoteRequestDTO requestDTO) {
+        Quote quote = quoteRepository.findById(quoteId).orElseThrow(NotFoundException::new);
 
-        quote.setId(quoteId);
+        quote.setText(requestDTO.text());
 
-        return quoteRepository.save(quote);
+        return QuoteMapper.entityToResponseDTO(quoteRepository.save(quote));
     }
 
     public void deleteQuote(Long quoteId) {

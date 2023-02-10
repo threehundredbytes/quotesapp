@@ -17,58 +17,89 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static ru.threehundredbytes.quotesapp.util.ResourceUtils.getResourceFileAsString;
 
 @SpringBootTest
-@Sql(value = { "/sql/quote/insertion.sql", "/sql/user/insertion.sql", "/sql/vote/insertion.sql" },
+@Sql(value = { "/sql/user/insertion.sql", "/sql/quote/insertion.sql", "/sql/vote/insertion.sql" },
         executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-@Sql(value = { "/sql/vote/deletion.sql", "/sql/user/deletion.sql", "/sql/quote/deletion.sql" },
+@Sql(value = { "/sql/vote/deletion.sql", "/sql/quote/deletion.sql", "/sql/user/deletion.sql" },
         executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class VoteIntegrationTest extends BaseIntegrationTest {
     @Autowired
     QuoteRepository quoteRepository;
 
-    @DisplayName("getVoteState() tests")
+    @DisplayName("getAllVotes() tests")
+    @Nested
+    class GetAllVotesTest {
+        @Test
+        @SneakyThrows
+        void getAllVotes_quoteWithId2_isOk() {
+            String expectedResponse = getResourceFileAsString("json/response/vote/all.json");
+
+            mockMvc.perform(get("/api/v1/quotes/2/votes"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().json(expectedResponse));
+        }
+
+        @Test
+        @SneakyThrows
+        void getAllVotes_quoteWithoutVotes_isOk() {
+            String expectedResponse = getResourceFileAsString("json/response/vote/empty.json");
+
+            mockMvc.perform(get("/api/v1/quotes/6/votes"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().json(expectedResponse));
+        }
+
+        @Test
+        @SneakyThrows
+        void getAllVotes_quoteDoesNotExists_isNotFound() {
+            mockMvc.perform(get("/api/v1/quotes/0/votes"))
+                    .andExpect(status().isNotFound());
+        }
+    }
+
+    @DisplayName("getVote() tests")
     @Nested
     class GetVoteStateTest {
         @Test
         @SneakyThrows
-        void getVoteState_quoteIsNotVoted_isOk() {
-            String expectedResponse = getResourceFileAsString("json/response/vote/not_voted.json");
+        void getVote_quoteIsNotVoted_isOk() {
+            String expectedResponse = getResourceFileAsString("json/response/vote/notVoted.json");
 
-            mockMvc.perform(get("/api/v1/quotes/5/votes?userId=6"))
+            mockMvc.perform(get("/api/v1/quotes/6/votes/users/1"))
                     .andExpect(status().isOk())
                     .andExpect(content().json(expectedResponse));
         }
 
         @Test
         @SneakyThrows
-        void getVoteState_quoteIsDownVoted_isOk() {
-            String expectedResponse = getResourceFileAsString("json/response/vote/downvote.json");
+        void getVote_quoteIsDownVoted_isOk() {
+            String expectedResponse = getResourceFileAsString("json/response/vote/downVote.json");
 
-            mockMvc.perform(get("/api/v1/quotes/4/votes?userId=6"))
+            mockMvc.perform(get("/api/v1/quotes/5/votes/users/1"))
                     .andExpect(status().isOk())
                     .andExpect(content().json(expectedResponse));
         }
 
         @Test
         @SneakyThrows
-        void getVoteState_quoteIsUpVote_isOk() {
-            String expectedResponse = getResourceFileAsString("json/response/vote/upvote.json");
+        void getVote_quoteIsUpVote_isOk() {
+            String expectedResponse = getResourceFileAsString("json/response/vote/upVote.json");
 
-            mockMvc.perform(get("/api/v1/quotes/1/votes?userId=6"))
+            mockMvc.perform(get("/api/v1/quotes/2/votes/users/1"))
                     .andExpect(status().isOk())
                     .andExpect(content().json(expectedResponse));
         }
 
         @Test
         @SneakyThrows
-        void getVoteState_quoteDoesNotExists_isNotFound() {
-            mockMvc.perform(get("/api/v1/quotes/0/votes?userId=6"))
+        void getVote_quoteDoesNotExists_isNotFound() {
+            mockMvc.perform(get("/api/v1/quotes/0/votes/users/1"))
                     .andExpect(status().isNotFound());
         }
 
         @Test
         @SneakyThrows
-        void getVoteState_userDoesNotExists_isNotFound() {
-            mockMvc.perform(get("/api/v1/quotes/1/votes?userId=0"))
+        void getVote_userDoesNotExists_isNotFound() {
+            mockMvc.perform(get("/api/v1/quotes/2/votes/users/0"))
                     .andExpect(status().isNotFound());
         }
     }
@@ -79,10 +110,10 @@ public class VoteIntegrationTest extends BaseIntegrationTest {
         @Test
         @SneakyThrows
         void upVote_quoteIsNotVoted_isOk() {
-            String expectedResponse = getResourceFileAsString("json/response/vote/upvote.json");
+            String expectedResponse = getResourceFileAsString("json/response/vote/upVote.json");
 
-            long quoteId = 5L;
-            long userId = 6L;
+            long quoteId = 6L;
+            long userId = 1L;
 
             String requestUrl = String.format("/api/v1/quotes/%d/votes/up?userId=%d", quoteId, userId);
 
@@ -98,10 +129,10 @@ public class VoteIntegrationTest extends BaseIntegrationTest {
         @Test
         @SneakyThrows
         void upVote_quoteIsDownVoted_isOk() {
-            String expectedResponse = getResourceFileAsString("json/response/vote/upvote.json");
+            String expectedResponse = getResourceFileAsString("json/response/vote/upVote.json");
 
-            long quoteId = 4L;
-            long userId = 6L;
+            long quoteId = 5L;
+            long userId = 1L;
 
             String requestUrl = String.format("/api/v1/quotes/%d/votes/up?userId=%d", quoteId, userId);
 
@@ -117,21 +148,21 @@ public class VoteIntegrationTest extends BaseIntegrationTest {
         @Test
         @SneakyThrows
         void upVote_quoteIsUpVoted_isConflict() {
-            mockMvc.perform(post("/api/v1/quotes/1/votes/up?userId=6"))
+            mockMvc.perform(post("/api/v1/quotes/2/votes/up?userId=1"))
                     .andExpect(status().isConflict());
         }
 
         @Test
         @SneakyThrows
         void upVote_quoteDoesNotExists_isNotFound() {
-            mockMvc.perform(post("/api/v1/quotes/0/votes/up?userId=6"))
+            mockMvc.perform(post("/api/v1/quotes/0/votes/up?userId=1"))
                     .andExpect(status().isNotFound());
         }
 
         @Test
         @SneakyThrows
         void upVote_userDoesNotExists_isNotFound() {
-            mockMvc.perform(post("/api/v1/quotes/5/votes/up?userId=0"))
+            mockMvc.perform(post("/api/v1/quotes/6/votes/up?userId=0"))
                     .andExpect(status().isNotFound());
         }
     }
@@ -142,10 +173,10 @@ public class VoteIntegrationTest extends BaseIntegrationTest {
         @Test
         @SneakyThrows
         void downVote_quoteIsNotVoted_isOk() {
-            String expectedResponse = getResourceFileAsString("json/response/vote/downvote.json");
+            String expectedResponse = getResourceFileAsString("json/response/vote/downVote.json");
 
-            long quoteId = 5L;
-            long userId = 6L;
+            long quoteId = 6L;
+            long userId = 1L;
 
             String requestUrl = String.format("/api/v1/quotes/%d/votes/down?userId=%d", quoteId, userId);
 
@@ -161,10 +192,10 @@ public class VoteIntegrationTest extends BaseIntegrationTest {
         @Test
         @SneakyThrows
         void downVote_quoteIsUpVoted_isOk() {
-            String expectedResponse = getResourceFileAsString("json/response/vote/downvote.json");
+            String expectedResponse = getResourceFileAsString("json/response/vote/downVote.json");
 
-            long quoteId = 1L;
-            long userId = 6L;
+            long quoteId = 2L;
+            long userId = 1L;
 
             String requestUrl = String.format("/api/v1/quotes/%d/votes/down?userId=%d", quoteId, userId);
 
@@ -180,21 +211,21 @@ public class VoteIntegrationTest extends BaseIntegrationTest {
         @Test
         @SneakyThrows
         void downVote_quoteIsDownVoted_isConflict() {
-            mockMvc.perform(post("/api/v1/quotes/4/votes/down?userId=6"))
+            mockMvc.perform(post("/api/v1/quotes/5/votes/down?userId=1"))
                     .andExpect(status().isConflict());
         }
 
         @Test
         @SneakyThrows
         void downVote_quoteDoesNotExists_isNotFound() {
-            mockMvc.perform(post("/api/v1/quotes/0/votes/down?userId=6"))
+            mockMvc.perform(post("/api/v1/quotes/0/votes/down?userId=1"))
                     .andExpect(status().isNotFound());
         }
 
         @Test
         @SneakyThrows
         void downVote_userDoesNotExists_isNotFound() {
-            mockMvc.perform(post("/api/v1/quotes/5/votes/down?userId=0"))
+            mockMvc.perform(post("/api/v1/quotes/6/votes/down?userId=0"))
                     .andExpect(status().isNotFound());
         }
     }
@@ -205,8 +236,8 @@ public class VoteIntegrationTest extends BaseIntegrationTest {
         @Test
         @SneakyThrows
         void deleteVote_quoteIsUpVoted_isNoContent() {
-            long quoteId = 1L;
-            long userId = 6L;
+            long quoteId = 2L;
+            long userId = 1L;
 
             String requestUrl = String.format("/api/v1/quotes/%d/votes?userId=%d", quoteId, userId);
 
@@ -221,8 +252,8 @@ public class VoteIntegrationTest extends BaseIntegrationTest {
         @Test
         @SneakyThrows
         void deleteVote_quoteIsDownVoted_isNoContent() {
-            long quoteId = 4L;
-            long userId = 6L;
+            long quoteId = 5L;
+            long userId = 1L;
 
             String requestUrl = String.format("/api/v1/quotes/%d/votes?userId=%d", quoteId, userId);
 
@@ -238,21 +269,21 @@ public class VoteIntegrationTest extends BaseIntegrationTest {
         @Test
         @SneakyThrows
         void deleteVote_quoteIsNotVoted_isNotFound() {
-            mockMvc.perform(delete("/api/v1/quotes/5/votes?userId=6"))
+            mockMvc.perform(delete("/api/v1/quotes/6/votes?userId=1"))
                     .andExpect(status().isNotFound());
         }
 
         @Test
         @SneakyThrows
         void deleteVote_quoteDoesNotExists_isNotFound() {
-            mockMvc.perform(delete("/api/v1/quotes/0/votes?userId=6"))
+            mockMvc.perform(delete("/api/v1/quotes/0/votes?userId=1"))
                     .andExpect(status().isNotFound());
         }
 
         @Test
         @SneakyThrows
         void deleteVote_userDoesNotExists_isNotFound() {
-            mockMvc.perform(delete("/api/v1/quotes/1/votes?userId=0"))
+            mockMvc.perform(delete("/api/v1/quotes/2/votes?userId=0"))
                     .andExpect(status().isNotFound());
         }
     }

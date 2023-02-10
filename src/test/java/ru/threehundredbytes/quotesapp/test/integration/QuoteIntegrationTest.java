@@ -19,8 +19,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static ru.threehundredbytes.quotesapp.util.ResourceUtils.getResourceFileAsString;
 
 @SpringBootTest
-@Sql(value = "/sql/quote/insertion.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-@Sql(value = "/sql/quote/deletion.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+@Sql(value = { "/sql/user/insertion.sql", "/sql/quote/insertion.sql" }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(value = { "/sql/quote/deletion.sql", "/sql/user/deletion.sql" }, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class QuoteIntegrationTest extends BaseIntegrationTest {
     @Autowired
     QuoteRepository quoteRepository;
@@ -35,7 +35,9 @@ public class QuoteIntegrationTest extends BaseIntegrationTest {
 
             mockMvc.perform(get("/api/v1/quotes"))
                     .andExpect(status().isOk())
-                    .andExpect(content().json(expectedResponse));
+                    .andExpect(content().json(expectedResponse))
+                    .andExpect(jsonPath("$[*].createdAt").isNotEmpty())
+                    .andExpect(jsonPath("$[*].modifiedAt").isNotEmpty());
         }
 
         @Test
@@ -65,7 +67,12 @@ public class QuoteIntegrationTest extends BaseIntegrationTest {
             mockMvc.perform(get("/api/v1/quotes/random"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.id").isNumber())
-                    .andExpect(jsonPath("$.text").value(Matchers.in(quoteTexts)));
+                    .andExpect(jsonPath("$.text").value(Matchers.in(quoteTexts)))
+                    .andExpect(jsonPath("$.voteCounter").value(0))
+                    .andExpect(jsonPath("$.postedByUserId").value(1))
+                    .andExpect(jsonPath("$.postedByUsername").value("admin"))
+                    .andExpect(jsonPath("$.createdAt").isNotEmpty())
+                    .andExpect(jsonPath("$.modifiedAt").isNotEmpty());
         }
 
         @Test
@@ -87,11 +94,13 @@ public class QuoteIntegrationTest extends BaseIntegrationTest {
             String requestContent = getResourceFileAsString("json/request/quote/create.json");
             String expectedResponse = getResourceFileAsString("json/response/quote/created.json");
 
-            mockMvc.perform(post("/api/v1/quotes")
+            mockMvc.perform(post("/api/v1/quotes?userId=1")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestContent))
                     .andExpect(status().isCreated())
-                    .andExpect(content().json(expectedResponse));
+                    .andExpect(content().json(expectedResponse))
+                    .andExpect(jsonPath("$.createdAt").isNotEmpty())
+                    .andExpect(jsonPath("$.modifiedAt").isNotEmpty());
         }
     }
 
@@ -104,11 +113,13 @@ public class QuoteIntegrationTest extends BaseIntegrationTest {
             String requestContent = getResourceFileAsString("json/request/quote/update.json");
             String expectedResponse = getResourceFileAsString("json/response/quote/updated.json");
 
-            mockMvc.perform(put("/api/v1/quotes/1")
+            mockMvc.perform(put("/api/v1/quotes/2")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestContent))
                     .andExpect(status().isOk())
-                    .andExpect(content().json(expectedResponse));
+                    .andExpect(content().json(expectedResponse))
+                    .andExpect(jsonPath("$.createdAt").isNotEmpty())
+                    .andExpect(jsonPath("$.modifiedAt").isNotEmpty());
         }
 
         @Test
@@ -116,7 +127,7 @@ public class QuoteIntegrationTest extends BaseIntegrationTest {
         void updateQuote_quoteDoesNotExists_isNotFound() {
             String requestContent = getResourceFileAsString("json/request/quote/update.json");
 
-            mockMvc.perform(put("/api/v1/quotes/6")
+            mockMvc.perform(put("/api/v1/quotes/0")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestContent))
                     .andExpect(status().isNotFound());
@@ -129,14 +140,14 @@ public class QuoteIntegrationTest extends BaseIntegrationTest {
         @Test
         @SneakyThrows
         void deleteQuoteById_quoteExists_isNoContent() {
-            mockMvc.perform(delete("/api/v1/quotes/1"))
+            mockMvc.perform(delete("/api/v1/quotes/2"))
                     .andExpect(status().isNoContent());
         }
 
         @Test
         @SneakyThrows
         void deleteQuoteById_quoteDoesNotExist_isNotFound() {
-            mockMvc.perform(delete("/api/v1/quotes/6"))
+            mockMvc.perform(delete("/api/v1/quotes/0"))
                     .andExpect(status().isNotFound());
         }
     }

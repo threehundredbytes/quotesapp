@@ -1,8 +1,11 @@
 package ru.threehundredbytes.quotesapp.persistence.entity;
 
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -11,6 +14,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 @Entity
 @Table(name = "users")
+@EntityListeners(AuditingEntityListener.class)
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -18,4 +22,12 @@ public class User {
 
     @Column(unique = true)
     private String username;
+
+    @Column(unique = true)
+    private String email;
+
+    private String password;
+
+    @CreationTimestamp
+    private LocalDate createdAt;
 }

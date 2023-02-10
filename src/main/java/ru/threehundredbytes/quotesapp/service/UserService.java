@@ -2,6 +2,9 @@ package ru.threehundredbytes.quotesapp.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.threehundredbytes.quotesapp.api.mapper.UserMapper;
+import ru.threehundredbytes.quotesapp.api.model.request.UserRequestDTO;
+import ru.threehundredbytes.quotesapp.api.model.response.UserResponseDTO;
 import ru.threehundredbytes.quotesapp.exception.ConflictException;
 import ru.threehundredbytes.quotesapp.persistence.entity.User;
 import ru.threehundredbytes.quotesapp.persistence.repository.UserRepository;
@@ -11,11 +14,21 @@ import ru.threehundredbytes.quotesapp.persistence.repository.UserRepository;
 public class UserService {
     private final UserRepository userRepository;
 
-    public User createUser(User user) {
-        if (userRepository.existsByUsername(user.getUsername())) {
+    public UserResponseDTO createUser(UserRequestDTO requestDTO) {
+        if (userRepository.existsByUsername(requestDTO.username())) {
             throw new ConflictException();
         }
 
-        return userRepository.save(user);
+        if (userRepository.existsByEmail(requestDTO.username())) {
+            throw new ConflictException();
+        }
+
+        User user = User.builder()
+                .username(requestDTO.username())
+                .email(requestDTO.email())
+                .password(requestDTO.password())
+                .build();
+
+        return UserMapper.entityToResponseDTO(userRepository.save(user));
     }
 }

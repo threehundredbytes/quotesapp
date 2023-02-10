@@ -1,11 +1,12 @@
 package ru.threehundredbytes.quotesapp.persistence.entity;
 
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -13,6 +14,7 @@ import javax.persistence.Id;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 public class Quote {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -21,4 +23,13 @@ public class Quote {
 
     @Builder.Default
     private Long voteCounter = 0L;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    private User postedBy;
+
+    @CreationTimestamp
+    private LocalDate createdAt;
+
+    @LastModifiedDate
+    private LocalDate modifiedAt;
 }

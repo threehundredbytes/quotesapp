@@ -10,8 +10,7 @@ import ru.threehundredbytes.quotesapp.persistence.entity.User;
 import ru.threehundredbytes.quotesapp.persistence.repository.UserRepository;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static ru.threehundredbytes.quotesapp.util.ResourceUtils.getResourceFileAsString;
 
 @SpringBootTest
@@ -29,7 +28,8 @@ public class UserIntegrationTest extends BaseIntegrationTest {
 
         mockMvc.perform(post("/api/v1/users").contentType(MediaType.APPLICATION_JSON).content(requestContent))
                 .andExpect(status().isCreated())
-                .andExpect(content().json(expectedResponse));
+                .andExpect(content().json(expectedResponse))
+                .andExpect(jsonPath("$.createdAt").isNotEmpty());
     }
 
     @Test
@@ -37,6 +37,20 @@ public class UserIntegrationTest extends BaseIntegrationTest {
     void createUser_userWithSameUsernameExists_isConflict() {
         userRepository.save(User.builder()
                 .username("user")
+                .build());
+
+        String requestContent = getResourceFileAsString("json/request/user/create.json");
+
+        mockMvc.perform(post("/api/v1/users").contentType(MediaType.APPLICATION_JSON).content(requestContent))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    @SneakyThrows
+    void createUser_userWithSameEmailExists_isConflict() {
+        userRepository.save(User.builder()
+                .username("user")
+                .email("user@mail.com")
                 .build());
 
         String requestContent = getResourceFileAsString("json/request/user/create.json");
