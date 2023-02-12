@@ -20,12 +20,13 @@ public class User {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(unique = true)
+    @Column(unique = true, length = 32)
     private String username;
 
-    @Column(unique = true)
+    @Column(unique = true, length = 32)
     private String email;
 
+    @Column(length = 128)
     private String password;
 
     @CreationTimestamp

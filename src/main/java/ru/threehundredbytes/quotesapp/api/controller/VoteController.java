@@ -7,6 +7,7 @@ import ru.threehundredbytes.quotesapp.api.model.request.VoteRequestDTO;
 import ru.threehundredbytes.quotesapp.api.model.response.VoteResponseDTO;
 import ru.threehundredbytes.quotesapp.service.VoteService;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -31,7 +32,7 @@ public class VoteController {
     @ResponseStatus(HttpStatus.OK)
     public VoteResponseDTO createVote(
             @PathVariable Long quoteId,
-            @RequestBody VoteRequestDTO requestDTO,
+            @Valid @RequestBody VoteRequestDTO requestDTO,
             @RequestParam Long userId) {
         return voteService.createVote(quoteId, requestDTO, userId);
     }

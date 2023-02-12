@@ -7,6 +7,8 @@ import ru.threehundredbytes.quotesapp.api.model.request.UserRequestDTO;
 import ru.threehundredbytes.quotesapp.api.model.response.UserResponseDTO;
 import ru.threehundredbytes.quotesapp.service.UserService;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
@@ -15,7 +17,7 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserResponseDTO createUser(@RequestBody UserRequestDTO requestDTO) {
+    public UserResponseDTO createUser(@Valid @RequestBody UserRequestDTO requestDTO) {
         return userService.createUser(requestDTO);
     }
 }

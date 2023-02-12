@@ -19,6 +19,8 @@ public class Quote {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+
+    @Column(length = 512)
     private String text;
 
     @Builder.Default
